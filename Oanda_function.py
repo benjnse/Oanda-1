@@ -83,8 +83,8 @@ class option:
         try:
             self.client = Client(
                 environment=TRADE,
-                account_id="600980",
-                access_token="7086220ef5e35a2ec74da38e3ddce5f2-9b3ec4bf06e09fdc826836ea7835ecb9"
+                account_id="",
+                access_token=""
             )
             print self.underlying+' connection succeeded...'
         except:
@@ -137,7 +137,6 @@ class option:
         delta_t=datetime.strptime(self.mat_date,'%Y%m%d')-datetime.strptime(datecov2(datetime.today()),'%Y%m%d')
         self.T=float(delta_t.days)/float(365)
         self.now=datetime.now()
-        #self.vol=self.get_underlying_vol()
         self.S=self.get_underlying_price()
         if self.strategy=='call' or self.strategy=='put':
             self.model=[BSmodel(self.K[0], self.T, self.strategy)]
@@ -343,7 +342,7 @@ def get_option_position(fileName_):
 
 def send_hotmail(subject, content):
 
-    from_email={'login': 'flycapital@hotmail.com', 'pwd': 'FN891124fly'}
+    from_email={'login': '', 'pwd': ''}
     to_email='finatos@me.com'
 
     msg=MIMEText(content)
