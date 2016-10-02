@@ -1,4 +1,4 @@
-from pyoanda import Order, Client, TRADE
+from pyoanda import Order, Client, PRACTICE
 import collections
 import math
 import csv
@@ -11,6 +11,7 @@ from scipy.stats import norm
 import smtplib
 from email.mime.text import MIMEText
 import sys
+
 sys.setrecursionlimit(99999999)
 
 
@@ -52,9 +53,10 @@ class BSmodel:
 
 class option:
 
-    def __init__(self, underlying, K, mat_date, strategy, notional, buy_sell):
+    def __init__(self, underlying, K, mat_date, strategy, notional, buy_sell, set_obj):
         run_time=time.strftime("%Y%m%d_%H%M%S")
-        log_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option log'
+        #log_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option log'
+        log_dir='/Users/MengfeiZhang/Desktop/tmp'
         self.client=None
         self.K=K
         self.mat_date=mat_date #yyyymmdd
@@ -73,6 +75,7 @@ class option:
         self.now=None
         self.updated=False
         self.restart=True
+        self.set_obj=set_obj
         # connect
         self.connect()
         # get static data
@@ -82,9 +85,9 @@ class option:
     def connect(self):
         try:
             self.client = Client(
-                environment=TRADE,
-                account_id="",
-                access_token=""
+                environment=PRACTICE,
+                account_id=self.set_obj.get_account_id(),
+                access_token=self.set_obj.get_token()
             )
             print self.underlying+' connection succeeded...'
         except:
@@ -98,7 +101,7 @@ class option:
             price_resp=price_resp['prices'][0]
             return (price_resp['bid']+price_resp['bid'])/2
         except Exception as err:
-            print err
+            print >>self.f, err
 
     def get_underlying_vol(self):
 
@@ -213,9 +216,9 @@ class option:
                         resp_order = self.client.create_order(order=order)
                         self.last_price=self.S #update last price
                         print >>self.f,'Order placed: ', resp_order
-                        send_hotmail('Order placed('+self.underlying+')', str(resp_order))
+                        send_hotmail('Order placed('+self.underlying+')', resp_order, self.set_obj)
                     except Exception as err:
-                        print err
+                        print >>self.f, err
                         print "order not executed..."
                         self.manually_close=False
 
@@ -254,17 +257,11 @@ class option:
 
                 position_diff=int(position-current_position)
                 #schedule
-                if (int(self.now.hour),int(self.now.minute))==(3,1) and self.updated==False:
-                    self.updated=True
-                elif (int(self.now.hour),int(self.now.minute))==(9,1) and self.updated==False:
-                    self.updated=True
-                elif (int(self.now.hour),int(self.now.minute))==(15,1) and self.updated==False:
-                    self.updated=True
-                elif (int(self.now.hour),int(self.now.minute))==(21,1) and self.updated==False:
+                if ((int(self.now.hour),int(self.now.minute)) in self.set_obj.get_sche())==True and self.updated==False:
                     self.updated=True
                 else:
                     self.updated=False
-                if abs(ret)>self.get_intraday_vol() or self.updated==True or self.restart==True: #if difference is large
+                if abs(ret)>self.get_intraday_vol() or self.updated==True or self.restart==True:
                     print >>self.f,'position '+'('+self.underlying+')'+' already exists, adjusting position...'
                     if self.updated==True:
                         print >> self.f, 'position updated in force...'
@@ -288,9 +285,9 @@ class option:
                         resp_order = self.client.create_order(order=order)
                         self.last_price=self.S
                         print >>self.f,'Order placed: ', resp_order
-                        send_hotmail('Order placed('+self.underlying+')', str(resp_order))
+                        send_hotmail('Order placed('+self.underlying+')', resp_order, self.set_obj)
                     except Exception as err:
-                        print err
+                        print >>self.f, err
                         print >>self.f,"order not executed..."
                         self.manually_close=False
 
@@ -313,10 +310,10 @@ class option:
             print self.underlying+' disconnected, try to reconnect '+str(datetime.now())+'...'
             self.connect()
 
-        threading.Timer(50, self.start).start()
+        threading.Timer(self.set_obj.get_timer(), self.start).start()
 
 
-def get_option_position(fileName_):
+def get_option_position(fileName_, set_obj):
     contracts=[]
     file = open(fileName_, 'r')
     try:
@@ -329,10 +326,10 @@ def get_option_position(fileName_):
             side=row[4]
             if deal_type !='straddle':
                 strike=[float(row[5])]
-                contracts.append(option(ccy, strike, maturity, deal_type, notional, side))
+                contracts.append(option(ccy, strike, maturity, deal_type, notional, side, set_obj))
             elif deal_type=='straddle':
                 strike=[float(row[5]),float(row[6])]
-                contracts.append(option(ccy, strike, maturity, deal_type, notional, side))
+                contracts.append(option(ccy, strike, maturity, deal_type, notional, side, set_obj))
             else:
                 print 'unknown deal type...'
 
@@ -340,12 +337,12 @@ def get_option_position(fileName_):
         file.close()
     return contracts
 
-def send_hotmail(subject, content):
-
-    from_email={'login': '', 'pwd': ''}
+def send_hotmail(subject, content, set_obj):
+    msg_txt=format_email_dict(content)
+    from_email={'login': set_obj.get_email_login(), 'pwd': set_obj.get_email_pwd()}
     to_email='finatos@me.com'
 
-    msg=MIMEText(content)
+    msg=MIMEText(msg_txt)
     msg['Subject'] = subject
     msg['From'] = from_email['login']
     msg['To'] = to_email
@@ -355,5 +352,56 @@ def send_hotmail(subject, content):
     mail.login(from_email['login'], from_email['pwd'])
     mail.sendmail(from_email['login'], to_email, msg.as_string())
     mail.close()
+
+
+def format_email_dict(content):
+    content_tmp=''
+    for item in content.keys():
+        content_tmp+=str(item)+':'+str(content[item])+'\r\n'
+    return content_tmp
+
+
+class set_obj:
+    def __init__(self, timer, sche, login_file):
+        self.timer=timer
+        self.sche=sche
+
+        file = open(login_file, 'r')
+        i=1
+        try:
+            reader = csv.reader(file)
+            for row in reader:
+                if i==1:
+                    self.account_id=row[0]
+                elif i==2:
+                    self.token=row[0]
+                elif i==3:
+                    self.email_login=row[0]
+                elif i==4:
+                    self.email_pwd=row[0]
+                i+=1
+
+        finally:
+            file.close()
+
+    def get_timer(self):
+        return self.timer
+
+    def get_sche(self):
+        return self.sche
+
+    def get_account_id(self):
+        return str(self.account_id)
+
+    def get_token(self):
+        return str(self.token)
+
+    def get_email_login(self):
+        return str(self.email_login)
+
+    def get_email_pwd(self):
+        return str(self.email_pwd)
+
+
 
 
