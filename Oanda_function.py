@@ -324,10 +324,10 @@ def get_option_position(fileName_, set_obj):
             deal_type=row[2]
             notional=int(row[3])
             side=row[4]
-            if deal_type !='straddle':
+            if ('spread' in deal_type) != True:
                 strike=[float(row[5])]
                 contracts.append(option(ccy, strike, maturity, deal_type, notional, side, set_obj))
-            elif deal_type=='straddle':
+            elif ('spread' in deal_type) == True:
                 strike=[float(row[5]),float(row[6])]
                 contracts.append(option(ccy, strike, maturity, deal_type, notional, side, set_obj))
             else:
