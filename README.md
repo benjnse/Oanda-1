@@ -1,2 +1,2 @@
 # Oanda
-fx trading software
+fx trading software, Black-Scholes Model
