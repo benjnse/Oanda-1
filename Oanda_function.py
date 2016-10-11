@@ -272,6 +272,7 @@ class option:
                         if position_diff==0:
                             position_diff=1
                         self.restart=False
+                        self.manually_close=True
                     else:
                         print >> self.f, 'price movement > 1 std'
 
