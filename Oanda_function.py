@@ -10,6 +10,7 @@ from scipy.optimize import minimize
 from scipy.stats import norm
 import smtplib
 from email.mime.text import MIMEText
+from Oanda_model import *
 import sys
 
 sys.setrecursionlimit(99999999)
@@ -19,36 +20,6 @@ def datecov2(date):
     date=str(date)
     return date[0:4]+date[5:7]+date[8:10]
 
-
-class BSmodel:
-
-    def __init__(self, K, T, type):
-        self.K=K
-        self.T=T
-        self.type=type
-
-    def price(self, S, r, d, vol):
-        d1=(math.log(S/self.K)+(r-d+0.5*vol*vol)*self.T)/(vol*math.sqrt(self.T))
-        d2=d1-vol*math.sqrt(self.T)
-
-        call_price=S*math.exp(-d*self.T)*norm.cdf(d1)-self.K*math.exp(-r*self.T)*norm.cdf(d2)
-        put_price=call_price-S*math.exp(-d*self.T)+self.K*math.exp(-r*self.T)
-
-        if self.type=='call':
-            return call_price
-        elif self.type=='put':
-            return put_price
-
-    def delta(self, S, r, d, vol):
-        d1=(math.log(S/self.K)+(r-d+0.5*vol*vol)*self.T)/(vol*math.sqrt(self.T))
-
-        call_delta=math.exp(-d*self.T)*norm.cdf(d1)
-        put_delta=-math.exp(-d*self.T)*norm.cdf(-d1)
-
-        if self.type=='call':
-            return call_delta
-        elif self.type=='put':
-            return put_delta
 
 
 class option:
@@ -76,11 +47,14 @@ class option:
         self.updated=False
         self.restart=True
         self.set_obj=set_obj
+        self.weekday=None
         # connect
         self.connect()
         # get static data
-        self.vol=self.get_underlying_vol()
         self.int_rate=self.get_interest_rate()
+        sabr_calib=SABRcalib(0.5, self.T)
+        sabr_calib.calib(self.get_hist_data(262*5))
+        self.SABRpara=sabr_calib.get_para()
 
     def connect(self):
         try:
@@ -102,6 +76,20 @@ class option:
             return (price_resp['bid']+price_resp['bid'])/2
         except Exception as err:
             print >>self.f, err
+
+
+    def get_hist_data(self, hist_len):
+        hist_resp=self.client.get_instrument_history(
+            instrument=self.underlying,
+            candle_format="midpoint",
+            granularity="D",
+            count=hist_len,
+        )
+        price=[]
+        for i in range(0,len(hist_resp['candles'])):
+            price.append(hist_resp['candles'][i]['closeMid'])
+
+        return price
 
     def get_underlying_vol(self):
 
@@ -125,34 +113,36 @@ class option:
     def get_option_value(self):
         price=0
         for i in range(0,len(self.model)):
-            price+=self.model[i].price(self.S, self.int_rate['ccy2'], self.int_rate['ccy1'], self.vol)*self.strategy_dir[i]
+            price+=self.model[i].price(self.S, self.int_rate['ccy2'], self.int_rate['ccy1'], self.SABRpara)*self.strategy_dir[i]
         return price
 
     def get_option_delta(self):
         delta=0
         for i in range(0,len(self.model)):
-            delta+=self.model[i].delta(self.S, self.int_rate['ccy2'], self.int_rate['ccy1'], self.vol)*self.strategy_dir[i]
+            delta+=self.model[i].delta(self.S, self.int_rate['ccy2'], self.int_rate['ccy1'], self.SABRpara)*self.strategy_dir[i]
 
         return delta
 
 
     def load_data(self):
         delta_t=datetime.strptime(self.mat_date,'%Y%m%d')-datetime.strptime(datecov2(datetime.today()),'%Y%m%d')
-        self.T=float(delta_t.days)/float(365)
+        self.T=float(delta_t.days)/float(365)+0.000001 #prevent expiry date error
         self.now=datetime.now()
+        self.weekday=datetime.today().weekday()
         self.S=self.get_underlying_price()
         if self.strategy=='call' or self.strategy=='put':
-            self.model=[BSmodel(self.K[0], self.T, self.strategy)]
+            self.model=[SABRmodel(self.K[0], self.T, self.strategy)]
             self.strategy_dir=[1]
         elif self.strategy=='straddle':
-            self.model=[BSmodel(self.K[0], self.T, 'call'), BSmodel(self.K[0], self.T, 'put')]
+            self.model=[SABRmodel(self.K[0], self.T, 'call'), SABRmodel(self.K[0], self.T, 'put')]
             self.strategy_dir=[1,1]
         elif self.strategy=='call_spread':
-            self.model=[BSmodel(self.K[0], self.T, 'call'), BSmodel(self.K[1], self.T, 'call')]
+            self.model=[SABRmodel(self.K[0], self.T, 'call'), SABRmodel(self.K[1], self.T, 'call')]
             self.strategy_dir=[1,-1]
         elif self.strategy=='put_spread':
-            self.model=[BSmodel(self.K[0], self.T, 'put'), BSmodel(self.K[1], self.T, 'put')]
+            self.model=[SABRmodel(self.K[0], self.T, 'put'), SABRmodel(self.K[1], self.T, 'put')]
             self.strategy_dir=[1,-1]
+
     def get_position(self):
         try:
             resp=self.client.get_position(instrument=self.underlying)
@@ -194,7 +184,15 @@ class option:
 
     def start(self): #start trading
         self.load_data()
+        if (int(self.weekday)==4 and int(self.now.hour)>=17) or int(self.weekday)==5 or (int(self.weekday)==6 and int(self.now.hour)<17): #Friday 5pm - Sunday 5pm
+            print 'market closed...'
+            return None
+
         if self.T<=0:
+            if self.get_position()!=None: #if there is position open
+                resp_expiry=self.client.close_position(instrument=self.underlying)
+                send_hotmail('Option expired('+self.underlying+')', resp_expiry, self.set_obj)
+
             print >> self.f, 'option has expired...'
             return None
 
@@ -219,13 +217,18 @@ class option:
                         send_hotmail('Order placed('+self.underlying+')', resp_order, self.set_obj)
                     except Exception as err:
                         print >>self.f, err
-                        print "order not executed..."
-                        self.manually_close=False
+                        if ('halt' in str(err))==True:
+                            print 'market closed...'
+                            return None
+                        else:
+                            print "order not executed..."
+                            self.manually_close=False
 
                     print >>self.f,'price'+'('+self.underlying+')'+'= '+str(self.get_underlying_price())
                     print >>self.f,'delta= '+str(self.get_option_delta())
                     print >>self.f,'T= '+str(self.T)
-                    print >>self.f,'volatility '+str(self.vol)
+                    print >>self.f,'SABR parameters: '+str(self.SABRpara)
+                    print >>self.f,'ATM volatility: '+str(self.SABRpara[0]*self.get_underlying_price()**(self.SABRpara[1]-1))
                     print >>self.f,'interest rate '+ str(self.int_rate)
                     print >>self.f,self.get_pos_dir(position)+' '+str(abs(position))+' '+self.underlying
                     print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
@@ -238,13 +241,16 @@ class option:
 
                 resp=self.client.close_position(instrument=self.underlying)
                 print >>self.f, resp
-                print >>self.f, 'unusual amount of position openned, position closed'
+                print >>self.f, 'unusual amount of position openned, position closed...'
                 return None
 
             else:
                 if self.last_price==0:
                     self.last_price=self.S
                 ret=math.log(self.S/self.last_price)
+
+                if abs(ret)>=3*self.get_intraday_vol():
+                    send_hotmail('3 Std move('+self.underlying+')', str(ret/self.get_intraday_vol()), self.set_obj)
 
                 position=self.get_option_delta()*self.notional
                 current_position=self.get_position()['units']
@@ -261,7 +267,8 @@ class option:
                     self.updated=True
                 else:
                     self.updated=False
-                if abs(ret)>self.get_intraday_vol() or self.updated==True or self.restart==True:
+
+                if (abs(ret)>self.get_intraday_vol()/self.set_obj.get_shift_scalar() and abs(ret)<3*self.get_intraday_vol()) or self.updated==True or self.restart==True:
                     print >>self.f,'position '+'('+self.underlying+')'+' already exists, adjusting position...'
                     if self.updated==True:
                         print >> self.f, 'position updated in force...'
@@ -289,13 +296,18 @@ class option:
                         send_hotmail('Order placed('+self.underlying+')', resp_order, self.set_obj)
                     except Exception as err:
                         print >>self.f, err
-                        print >>self.f,"order not executed..."
-                        self.manually_close=False
+                        if ('halt' in str(err))==True:
+                            print 'market closed...'
+                            return None
+                        else:
+                            print "order not executed..."
+                            self.manually_close=False
 
                     print >>self.f,'price'+'('+self.underlying+')'+'= '+str(self.get_underlying_price())
                     print >>self.f,'delta= '+str(self.get_option_delta())
                     print >>self.f,'T= '+str(self.T)
-                    print >>self.f,'volatility '+str(self.vol)
+                    print >>self.f,'SABR parameters: '+str(self.SABRpara)
+                    print >>self.f,'ATM volatility: '+str(self.SABRpara[0]*self.get_underlying_price()**(self.SABRpara[1]-1))
                     print >>self.f,'interest rate '+ str(self.int_rate)
                     print >>self.f,self.get_trd_dir(position_diff)+' '+str(abs(position_diff))+' '+self.underlying
                     print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
@@ -362,10 +374,11 @@ def format_email_dict(content):
     return content_tmp
 
 
-class set_obj:
-    def __init__(self, timer, sche, login_file):
+class set:
+    def __init__(self, timer, sche, shift_scalar, login_file):
         self.timer=timer
         self.sche=sche
+        self.shift_scalar=shift_scalar
 
         file = open(login_file, 'r')
         i=1
@@ -402,6 +415,9 @@ class set_obj:
 
     def get_email_pwd(self):
         return str(self.email_pwd)
+
+    def get_shift_scalar(self):
+        return self.shift_scalar
 
 
 
