@@ -250,7 +250,7 @@ class option:
                 ret=math.log(self.S/self.last_price)
 
                 if abs(ret)>=3*self.get_intraday_vol():
-                    send_hotmail('3 Std move('+self.underlying+')', str(ret/self.get_intraday_vol()), self.set_obj)
+                    send_hotmail('3 Std move('+self.underlying+')', {'msg ':str(ret/self.get_intraday_vol())}, self.set_obj)
 
                 position=self.get_option_delta()*self.notional
                 current_position=self.get_position()['units']
