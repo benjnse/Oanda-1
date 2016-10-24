@@ -184,7 +184,7 @@ class option:
 
     def start(self): #start trading
         self.load_data()
-        if (int(self.weekday)==4 and int(self.now.hour)>=17) or int(self.weekday)==5 or (int(self.weekday)==6 and int(self.now.hour)<17): #Friday 5pm - Sunday 5pm
+        if (int(self.weekday)==4 and int(self.now.hour)>=17): #Friday 5pm
             print 'market closed...'
             return None
 
@@ -214,7 +214,7 @@ class option:
                         resp_order = self.client.create_order(order=order)
                         self.last_price=self.S #update last price
                         print >>self.f,'Order placed: ', resp_order
-                        send_hotmail('Order placed('+self.underlying+')', resp_order, self.set_obj)
+                        send_hotmail('New position opened('+self.underlying+')', resp_order, self.set_obj)
                     except Exception as err:
                         print >>self.f, err
                         if ('halt' in str(err))==True:
@@ -272,16 +272,19 @@ class option:
                     print >>self.f,'position '+'('+self.underlying+')'+' already exists, adjusting position...'
                     if self.updated==True:
                         print >> self.f, 'position updated in force...'
+                        msg_title='Scheduled rebalance'
                         if position_diff==0:
                             position_diff=1
                     elif self.restart==True:
                         print >> self.f, 'position restarted..'
+                        msg_title='Restart position'
                         if position_diff==0:
                             position_diff=1
                         self.restart=False
                         self.manually_close=True
                     else:
                         print >> self.f, 'price movement > 1 std'
+                        msg_title='Big price move'
 
                     order = Order(
                         instrument=self.underlying,
@@ -293,7 +296,7 @@ class option:
                         resp_order = self.client.create_order(order=order)
                         self.last_price=self.S
                         print >>self.f,'Order placed: ', resp_order
-                        send_hotmail('Order placed('+self.underlying+')', resp_order, self.set_obj)
+                        send_hotmail(msg_title+'('+self.underlying+')', resp_order, self.set_obj)
                     except Exception as err:
                         print >>self.f, err
                         if ('halt' in str(err))==True:
