@@ -1,4 +1,4 @@
-from pyoanda import Order, Client, PRACTICE
+from pyoanda import Order, Client, TRADE
 import collections
 import math
 import csv
@@ -26,8 +26,8 @@ class option:
 
     def __init__(self, underlying, K, mat_date, strategy, notional, buy_sell, set_obj):
         run_time=time.strftime("%Y%m%d_%H%M%S")
-        #log_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option log'
-        log_dir='/Users/MengfeiZhang/Desktop/tmp'
+        log_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option log'
+        #log_dir='/Users/MengfeiZhang/Desktop/tmp'
         self.client=None
         self.K=K
         self.mat_date=mat_date #yyyymmdd
@@ -59,7 +59,7 @@ class option:
     def connect(self):
         try:
             self.client = Client(
-                environment=PRACTICE,
+                environment=TRADE,
                 account_id=self.set_obj.get_account_id(),
                 access_token=self.set_obj.get_token()
             )

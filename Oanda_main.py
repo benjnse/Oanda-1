@@ -5,12 +5,12 @@ from Oanda_function import *
 def main(args):
 
     if sys.argv[1]=='sche':
-        sche=[(3,1), (9,1), (18,35), (21,1)]
+        sche=[(3,1), (9,1), (15,1), (21,1)]
         timer=60
         shift_scalar=1
 
-        position_dir='/Users/MengfeiZhang/Desktop/tmp/option_position.csv'
-        login_file='/Users/MengfeiZhang/Desktop/tmp/login_info.csv'
+        position_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option_position.csv'
+        login_file='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/login_file.csv'
 
         set_obj=set(timer, sche, shift_scalar, login_file)
         contracts=get_option_position(position_dir, set_obj)
@@ -31,8 +31,8 @@ def main(args):
         timer=5
         shift_scalar=3.3
 
-        position_dir='/Users/MengfeiZhang/Desktop/tmp/option_position_adhoc.csv'
-        login_file='/Users/MengfeiZhang/Desktop/tmp/login_info.csv'
+        position_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option_position_adhoc.csv'
+        login_file='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/login_file.csv'
 
         set_obj=set(timer, sche, shift_scalar, login_file)
         contracts=get_option_position(position_dir, set_obj)
