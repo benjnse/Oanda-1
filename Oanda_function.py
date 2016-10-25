@@ -45,6 +45,7 @@ class option:
         self.locker=threading.Lock()
         self.now=None
         self.updated=False
+        self.update_count=0
         self.restart=True
         self.set_obj=set_obj
         self.weekday=None
@@ -263,25 +264,30 @@ class option:
 
                 position_diff=int(position-current_position)
                 #schedule
-                if ((int(self.now.hour),int(self.now.minute)) in self.set_obj.get_sche())==True and self.updated==False:
-                    self.updated=True
-                else:
+                if  (int(self.now.hour) in self.set_obj.get_sche())==True:
+                    if self.updated==False:
+                        self.updated=True
+                        self.update_count+=1
+                    else:
+                        self.update_count+=1
+                else: #past schedule, reset parameters
                     self.updated=False
+                    self.update_count=0
 
-                if (abs(ret)>self.get_intraday_vol()/self.set_obj.get_shift_scalar() and abs(ret)<3*self.get_intraday_vol()) or self.updated==True or self.restart==True:
+                if (abs(ret)>self.get_intraday_vol()/self.set_obj.get_shift_scalar() and abs(ret)<3*self.get_intraday_vol()) or (self.updated==True and self.update_count==1) or self.restart==True:
                     print >>self.f,'position '+'('+self.underlying+')'+' already exists, adjusting position...'
-                    if self.updated==True:
-                        print >> self.f, 'position updated in force...'
-                        msg_title='Scheduled rebalance'
-                        if position_diff==0:
-                            position_diff=1
-                    elif self.restart==True:
+                    if self.restart==True:
                         print >> self.f, 'position restarted..'
                         msg_title='Restart position'
                         if position_diff==0:
                             position_diff=1
                         self.restart=False
                         self.manually_close=True
+                    elif self.updated==True:
+                        print >> self.f, 'position updated in force...'
+                        msg_title='Scheduled rebalance'
+                        if position_diff==0:
+                            position_diff=1
                     else:
                         print >> self.f, 'price movement > 1 std'
                         msg_title='Big price move'
