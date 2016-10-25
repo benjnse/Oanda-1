@@ -5,7 +5,7 @@ from Oanda_function import *
 def main(args):
 
     if sys.argv[1]=='sche':
-        sche=[0, 9, 15, 21]
+        sche=[3, 9, 15, 21]
         timer=60
         shift_scalar=1
 
