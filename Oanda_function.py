@@ -20,8 +20,6 @@ def datecov2(date):
     date=str(date)
     return date[0:4]+date[5:7]+date[8:10]
 
-
-
 class option:
 
     def __init__(self, underlying, K, mat_date, strategy, notional, buy_sell, set_obj):
@@ -92,7 +90,7 @@ class option:
 
         return price
 
-    def get_underlying_vol(self):
+    def get_hist_vol(self):
 
         hist_resp=self.client.get_instrument_history(
             instrument=self.underlying,
@@ -107,9 +105,12 @@ class option:
 
         return np.std(ret_tmp)*math.sqrt(262)
 
+    def get_atm_vol(self):
+        return self.SABRpara[0]*self.get_underlying_price()**(self.SABRpara[1]-1)
+
     def get_intraday_vol(self):
 
-        return self.get_underlying_vol()/math.sqrt(262)
+        return self.get_atm_vol()/math.sqrt(262)
 
     def get_option_value(self):
         price=0
@@ -229,7 +230,7 @@ class option:
                     print >>self.f,'delta= '+str(self.get_option_delta())
                     print >>self.f,'T= '+str(self.T)
                     print >>self.f,'SABR parameters: '+str(self.SABRpara)
-                    print >>self.f,'ATM volatility: '+str(self.SABRpara[0]*self.get_underlying_price()**(self.SABRpara[1]-1))
+                    print >>self.f,'ATM volatility: '+str(self.get_atm_vol())
                     print >>self.f,'interest rate '+ str(self.int_rate)
                     print >>self.f,self.get_pos_dir(position)+' '+str(abs(position))+' '+self.underlying
                     print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
@@ -316,7 +317,7 @@ class option:
                     print >>self.f,'delta= '+str(self.get_option_delta())
                     print >>self.f,'T= '+str(self.T)
                     print >>self.f,'SABR parameters: '+str(self.SABRpara)
-                    print >>self.f,'ATM volatility: '+str(self.SABRpara[0]*self.get_underlying_price()**(self.SABRpara[1]-1))
+                    print >>self.f,'ATM volatility: '+str(self.get_atm_vol())
                     print >>self.f,'interest rate '+ str(self.int_rate)
                     print >>self.f,self.get_trd_dir(position_diff)+' '+str(abs(position_diff))+' '+self.underlying
                     print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
