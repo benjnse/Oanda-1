@@ -72,7 +72,7 @@ class option:
         try:
             price_resp=self.client.get_prices(instruments=self.underlying, stream=False) #, stream=True
             price_resp=price_resp['prices'][0]
-            return (price_resp['bid']+price_resp['bid'])/2
+            return (price_resp['ask']+price_resp['bid'])/2
         except Exception as err:
             print >>self.f, err
 
