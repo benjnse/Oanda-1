@@ -29,7 +29,7 @@ def main(args):
     elif sys.argv[1]=='adhoc':
         sche=[]
         timer=5
-        shift_scalar=3.3
+        shift_scalar=3
 
         position_dir='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/option_position_adhoc.csv'
         login_file='C:/Users/Mengfei Zhang/Desktop/fly capital/trading/login_file.csv'
