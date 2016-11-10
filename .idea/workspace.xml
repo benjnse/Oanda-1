@@ -32,7 +32,7 @@
         <entry file="file://$PROJECT_DIR$/Oanda_main.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="36" column="58" selection-start-line="36" selection-start-column="58" selection-end-line="36" selection-end-column="58" />
+              <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
               </folding>
@@ -43,8 +43,8 @@
       <file leaf-file-name="Oanda_function.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Oanda_function.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.11415525">
-              <caret line="147" column="0" selection-start-line="147" selection-start-column="0" selection-end-line="155" selection-end-column="24" />
+            <state vertical-scroll-proportion="3.0379362">
+              <caret line="274" column="38" selection-start-line="274" selection-start-column="38" selection-end-line="274" selection-end-column="38" />
               <folding>
                 <element signature="e#0#40#0" expanded="true" />
               </folding>
@@ -56,7 +56,7 @@
         <entry file="file://$PROJECT_DIR$/Oanda_model.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
+              <caret line="199" column="18" selection-start-line="44" selection-start-column="0" selection-end-line="199" selection-end-column="18" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -84,9 +84,9 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="50" />
-    <option name="y" value="53" />
-    <option name="width" value="1230" />
+    <option name="x" value="52" />
+    <option name="y" value="23" />
+    <option name="width" value="1228" />
     <option name="height" value="777" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -356,10 +356,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="50" y="53" width="1230" height="777" extended-state="0" />
+    <frame x="52" y="23" width="1228" height="777" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18097644" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18381113" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -415,6 +415,36 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Oanda_main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Oanda_function.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#40#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Oanda_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="199" column="18" selection-start-line="44" selection-start-column="0" selection-end-line="199" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Oanda_main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -619,30 +649,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Oanda_main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="36" column="58" selection-start-line="36" selection-start-column="58" selection-end-line="36" selection-end-column="58" />
-          <folding>
-            <element signature="e#0#16#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Oanda_model.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="16" selection-start-line="10" selection-start-column="16" selection-end-line="10" selection-end-column="16" />
+          <caret line="199" column="18" selection-start-line="44" selection-start-column="0" selection-end-line="199" selection-end-column="18" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Oanda_main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="22" selection-start-line="17" selection-start-column="22" selection-end-line="17" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#16#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Oanda_function.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.11415525">
-          <caret line="147" column="0" selection-start-line="147" selection-start-column="0" selection-end-line="155" selection-end-column="24" />
+        <state vertical-scroll-proportion="3.0379362">
+          <caret line="274" column="38" selection-start-line="274" selection-start-column="38" selection-end-line="274" selection-end-column="38" />
           <folding>
             <element signature="e#0#40#0" expanded="true" />
           </folding>
