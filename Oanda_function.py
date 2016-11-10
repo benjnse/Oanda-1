@@ -76,7 +76,6 @@ class option:
         except Exception as err:
             print >>self.f, err
 
-
     def get_hist_data(self, hist_len):
         hist_resp=self.client.get_instrument_history(
             instrument=self.underlying,
@@ -236,9 +235,10 @@ class option:
                     print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
                     print >>self.f,self.now.strftime("%Y-%m-%d %H:%M:%S")
                     print >>self.f,'------------------------------------------------------------'
-                elif self.manually_close==True:
+                elif self.manually_close==True and self.get_position()==None: #in case fake close position
                     print 'position ('+self.underlying+') has been manually closed...'
                     return None
+
             elif self.get_position()['units']>self.notional:
 
                 resp=self.client.close_position(instrument=self.underlying)
@@ -291,7 +291,10 @@ class option:
                             position_diff=1
                     else:
                         print >> self.f, 'price movement > 1 std'
-                        msg_title='Big price move'
+                        if ret>0:
+                            msg_title='Big price move(+)'
+                        else:
+                            msg_title='Big price move(-)'
 
                     order = Order(
                         instrument=self.underlying,
