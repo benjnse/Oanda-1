@@ -291,7 +291,7 @@ class option:
                             position_diff=1
                     else:
                         print >> self.f, 'price movement > 1 std'
-                        if ret>0:
+                        if ret*position>0:
                             msg_title='Big price move(+)'
                         else:
                             msg_title='Big price move(-)'
