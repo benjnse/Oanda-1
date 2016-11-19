@@ -253,6 +253,7 @@ class option:
 
                 if abs(ret)>=3*self.get_intraday_vol():
                     send_hotmail('3 Std move('+self.underlying+')', {'msg ':str(ret/self.get_intraday_vol())}, self.set_obj)
+                    return None
 
                 position=self.get_option_delta()*self.notional
                 current_position=self.get_position()['units']
@@ -277,6 +278,11 @@ class option:
 
                 if (abs(ret)>self.get_intraday_vol()/self.set_obj.get_shift_scalar() and abs(ret)<3*self.get_intraday_vol()) or (self.updated==True and self.update_count==1) or self.restart==True:
                     print >>self.f,'position '+'('+self.underlying+')'+' already exists, adjusting position...'
+                    if ret*position>0:
+                        pnl_dir='(+)'
+                    else:
+                        pnl_dir='(-)'
+
                     if self.restart==True:
                         print >> self.f, 'position restarted..'
                         msg_title='Restart position'
@@ -286,15 +292,12 @@ class option:
                         self.manually_close=True
                     elif self.updated==True:
                         print >> self.f, 'position updated in force...'
-                        msg_title='Scheduled rebalance'
+                        msg_title='Scheduled rebalance'+pnl_dir
                         if position_diff==0:
                             position_diff=1
                     else:
                         print >> self.f, 'price movement > 1 std'
-                        if ret*position>0:
-                            msg_title='Big price move(+)'
-                        else:
-                            msg_title='Big price move(-)'
+                        msg_title='Big price move'+pnl_dir
 
                     order = Order(
                         instrument=self.underlying,
