@@ -253,6 +253,7 @@ class option:
 
                 if abs(ret)>=3*self.get_intraday_vol():
                     send_hotmail('3 Std move('+self.underlying+')', {'msg ':str(ret/self.get_intraday_vol())}, self.set_obj)
+                    print '3 Std move, trading halted...'
                     return None
 
                 position=self.get_option_delta()*self.notional
