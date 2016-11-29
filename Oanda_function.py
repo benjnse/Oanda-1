@@ -203,6 +203,7 @@ class option:
                 if self.manually_close==False:
                     print >>self.f,'position '+'('+self.underlying+')'+' does not exist, creating new position...'
                     self.manually_close=True
+                    self.restart=False
                     position=int(self.get_option_delta()*self.notional)
 
                     order = Order(
@@ -232,7 +233,7 @@ class option:
                     print >>self.f,'ATM volatility: '+str(self.get_atm_vol())
                     print >>self.f,'interest rate '+ str(self.int_rate)
                     print >>self.f,self.get_pos_dir(position)+' '+str(abs(position))+' '+self.underlying
-                    print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
+                    print >>self.f,'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
                     print >>self.f,self.now.strftime("%Y-%m-%d %H:%M:%S")
                     print >>self.f,'------------------------------------------------------------'
                 elif self.manually_close==True and self.get_position()==None: #in case fake close position
@@ -327,7 +328,7 @@ class option:
                     print >>self.f,'ATM volatility: '+str(self.get_atm_vol())
                     print >>self.f,'interest rate '+ str(self.int_rate)
                     print >>self.f,self.get_trd_dir(position_diff)+' '+str(abs(position_diff))+' '+self.underlying
-                    print >>self.f, 'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
+                    print >>self.f,'current total position is: '+self.get_position()['side']+' '+str(self.get_position()['units'])+' '+self.underlying
                     print >>self.f,self.now.strftime("%Y-%m-%d %H:%M:%S")
                     print >>self.f,'------------------------------------------------------------'
 
